@@ -121,7 +121,13 @@ def to_excel(df, date_str):
         df.to_excel(writer, index=False, sheet_name='StockList')
     return output.getvalue()
 
-excel_data = to_excel(st.session_state.df, stock_date.strftime('%Y-%m-%d'))
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        df.to_excel(writer, index=False, sheet_name='StockList')
+    return output.getvalue()
+
+excel_data = to_excel(st.session_state.df)
 
 st.download_button(
     label="下载为Excel",
