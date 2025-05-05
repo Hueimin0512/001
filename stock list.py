@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import io
 import os
+import datetime
 
 st.title("📦 点货记录小工具")
 
@@ -9,6 +10,9 @@ st.title("📦 点货记录小工具")
 DATA_FILE = "data.csv"
 
 st.markdown("请在下面输入您的点货数据：")
+
+# --- 新增：Stock as at 日期 ---
+stock_date = st.date_input("📅 Stock as at", value=datetime.date.today())
 
 # 可选择的 DESCRIPTION 列表
 description_options = [
@@ -95,18 +99,32 @@ if st.button("添加记录"):
     st.session_state.df.to_csv(DATA_FILE, index=False)  # 自动保存
     st.success("已添加并保存！")
 
+# --- 新增：删除记录功能 ---
+if not st.session_state.df.empty:
+    delete_index = st.number_input("输入要删除的行号 (从1开始)", min_value=1, max_value=len(st.session_state.df), step=1)
+    if st.button("删除该行"):
+        st.session_state.df = st.session_state.df.drop(delete_index - 1).reset_index(drop=True)
+        st.session_state.df.to_csv(DATA_FILE, index=False)
+        st.success(f"已删除第 {delete_index} 行")
+
 # 显示表格（手机端友好横排版 & 去掉左侧索引）
 if not st.session_state.df.empty:
+    st.markdown(f"### 📊 Stock as at: {stock_date.strftime('%Y-%m-%d')}")
     st.markdown(st.session_state.df.to_html(index=False), unsafe_allow_html=True)
 
 # 下载按钮 (Excel 版)
-def to_excel(df):
+def to_excel(df, date_str):
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # 在Sheet1写入数据表
         df.to_excel(writer, index=False, sheet_name='Sheet1')
+        # 在Sheet1 A1上方写入日期
+        ws = writer.sheets['Sheet1']
+        ws.insert_rows(1)
+        ws['A1'] = f"Stock as at: {date_str}"
     return output.getvalue()
 
-excel_data = to_excel(st.session_state.df)
+excel_data = to_excel(st.session_state.df, stock_date.strftime('%Y-%m-%d'))
 
 st.download_button(
     label="下载为Excel",
