@@ -1,4 +1,4 @@
 pandas
 openpyxl  # Excel操作
 numpy
-streamli
+streamlit
