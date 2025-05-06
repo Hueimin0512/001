@@ -96,14 +96,7 @@ if st.button("删除记录"):
 
 # 表格展示
 if not st.session_state.df.empty:
-    st.markdown(st.session_state.df.to_html(index=False), unsafe_allow_html=True)
-
-# 下载按钮
-def to_excel(df):
-    output = io.BytesIO()
-    with pd.ExcelWriter(output) as writer:
-        df.to_excel(writer, index=False, sheet_name='Sheet1')
-    return output.getvalue()
+    st.dataframe(st.session_state.df, use_container_width=True)
 
 # 下载按钮
 def to_excel(df):
