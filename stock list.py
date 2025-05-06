@@ -105,6 +105,13 @@ def to_excel(df):
         df.to_excel(writer, index=False, sheet_name='Sheet1')
     return output.getvalue()
 
+# 下载按钮
+def to_excel(df):
+    output = io.BytesIO()
+    with pd.ExcelWriter(output) as writer:
+        df.to_excel(writer, index=False, sheet_name='Sheet1')
+    return output.getvalue()
+
 excel_data = to_excel(st.session_state.df)
 
 st.download_button(
