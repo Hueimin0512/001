@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import os  # ✅ 别忘了导入 os 用来检查文件
 
 st.title("📦 点货记录小工具")
 
@@ -42,7 +41,7 @@ if "df" not in st.session_state:
     if os.path.exists(DATA_FILE):
         st.session_state.df = pd.read_csv(DATA_FILE)
     else:
-        st.session_state.df = pd.DataFrame(columns=[
+        st.session_state.df = pd.DataFrame(columns=[ 
             "ITEM", "DESCRIPTION", "STANDARD WEIGHT PER BAG",
             "NO OF BAG PER PALLET", "QUANTITY NO OF PELLET",
             "QUANTITY NO OF BAG ITEM", "TOTAL", "TOTAL WEIGHT", "remark"
@@ -111,13 +110,21 @@ def to_excel(df):
     if df.empty:
         df = pd.DataFrame({"提示": ["当前没有记录"]})
     output = io.BytesIO()
+    # 用xlsxwriter代替 openpyxl，更稳
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
+        writer.close()
     output.seek(0)
     return output.getvalue()
 
-# 🔥 生成excel数据
-excel_data = to_excel(st.session_state.get('df', pd.DataFrame()))
+# 检查和获取 DataFrame
+df = st.session_state.get('df', pd.DataFrame())
+
+# 打印 DataFrame 确认
+st.write("✅ 当前的 DataFrame：", df)
+
+# 生成 Excel 数据
+excel_data = to_excel(df)
 
 # ✅ 下载按钮
 st.download_button(
