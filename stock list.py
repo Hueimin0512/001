@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
+import os  # 导入 os 模块
 
 st.title("📦 点货记录小工具")
 
@@ -38,7 +39,7 @@ description_options = [
 
 # 初始化空数据表
 if "df" not in st.session_state:
-    if os.path.exists(DATA_FILE):
+    if os.path.exists(DATA_FILE):  # 现在os模块已导入
         st.session_state.df = pd.read_csv(DATA_FILE)
     else:
         st.session_state.df = pd.DataFrame(columns=[ 
@@ -133,3 +134,4 @@ st.download_button(
     file_name="点货记录.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
+
