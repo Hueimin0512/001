@@ -115,7 +115,9 @@ def to_excel(df):
         df.to_excel(writer, index=False, sheet_name='Sheet1')
     return output.getvalue()
 
-excel_data = to_excel(st.session_state.df)
+st.write("✅ 当前DF：", st.session_state.get('df'))
+import openpyxl
+st.write("✅ openpyxl 版本：", openpyxl.__version__)
 
 st.download_button(
     label="下载为Excel",
