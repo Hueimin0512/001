@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import io
-import os
 
 st.title("📦 点货记录小工具")
 
@@ -119,7 +118,6 @@ def to_excel(df):
     return output.getvalue()
 
 st.write("✅ 当前DF：", st.session_state.get('df'))
-
 
 # 🔥 先生成excel数据
 excel_data = to_excel(st.session_state.df)
