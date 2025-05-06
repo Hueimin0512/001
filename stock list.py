@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import io
 import os  # 导入 os 模块
+import xlsxwriter  # ✅ 检测 xlsxwriter 是否已装
+
+# ✅ 显示 xlsxwriter 版本
+st.write("✅ xlsxwriter 已安装，版本：", xlsxwriter.__version__)
 
 st.title("📦 点货记录小工具")
 
@@ -118,10 +122,10 @@ def to_excel(df):
     output.seek(0)
     return output.getvalue()
 
-# 检查和获取 DataFrame
+# 确保 df 是有效的
 df = st.session_state.get('df', pd.DataFrame())
 
-# 打印 DataFrame 确认
+# 打印 DataFrame，确保数据正确
 st.write("✅ 当前的 DataFrame：", df)
 
 # 生成 Excel 数据
@@ -134,4 +138,3 @@ st.download_button(
     file_name="点货记录.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
