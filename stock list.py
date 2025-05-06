@@ -4,15 +4,15 @@ import io
 import os
 import datetime
 
-st.set_page_config(page_title="📦 点货记录小工具", layout="wide")
+st.set_page_config(page_title="点货记录小工具", layout="wide")
 
 st.title("📦 点货记录小工具")
 
 # 保存数据的CSV文件
 DATA_FILE = "data.csv"
 
-# Stock as at 日期
-stock_date = st.date_input("Stock as at", value=datetime.date.today(), format="YYYY-MM-DD")
+# 显示 "Stock as at" 日期
+stock_date = st.date_input("Stock as at", value=datetime.date.today())
 
 # 可选择的 DESCRIPTION 列表
 description_options = [
@@ -40,7 +40,6 @@ description_options = [
     "CAT0723-C","CAT2023-OC","CAT2023-3OC","CAT1023-OC","CAT0723-OC","CAT06523-OC",
     "CAT2023-F","CAT1023-F","CAT0723-M","CAT1023-M","CAT2023-M","CAT2023-MC",
 ]
-
 # 初始化空数据表
 if "df" not in st.session_state:
     if os.path.exists(DATA_FILE):
@@ -55,6 +54,7 @@ if "df" not in st.session_state:
 # 输入栏
 st.header("输入点货资料")
 
+# 下拉+手动输入 DESCRIPTION
 description = st.selectbox("DESCRIPTION (可选或手动输入)", options=[""] + description_options)
 custom_description = st.text_input("若无，请手动输入DESCRIPTION")
 final_description = custom_description if custom_description else description
@@ -73,6 +73,7 @@ def eval_input(text):
     except:
         return 0
 
+# 添加记录按钮
 if st.button("添加记录"):
     bag_per_pallet = eval_input(bag_per_pallet_input)
     pallet_qty = eval_input(pallet_qty_input)
@@ -97,32 +98,35 @@ if st.button("添加记录"):
     st.session_state.df.to_csv(DATA_FILE, index=False)
     st.success("已添加并保存！")
 
-# 删除功能
-st.header("删除记录")
+# 删除记录按钮
+st.header("删除点货资料")
 delete_item = st.number_input("请输入要删除的 ITEM 编号", min_value=1, step=1)
-if st.button("删除记录"):
-    if not st.session_state.df.empty and delete_item <= len(st.session_state.df):
-        st.session_state.df = st.session_state.df[st.session_state.df["ITEM"] != delete_item].reset_index(drop=True)
-        st.session_state.df["ITEM"] = range(1, len(st.session_state.df) + 1)
-        st.session_state.df.to_csv(DATA_FILE, index=False)
-        st.success(f"已删除 ITEM {delete_item}！")
-    else:
-        st.warning("没有找到这个 ITEM 编号。")
 
-# 显示表格
-st.header("记录总览")
+if st.button("删除记录"):
+    if not st.session_state.df.empty:
+        if delete_item in st.session_state.df["ITEM"].values:
+            st.session_state.df = st.session_state.df[st.session_state.df["ITEM"] != delete_item]
+            st.session_state.df["ITEM"] = range(1, len(st.session_state.df) + 1)  # 重新编号
+            st.session_state.df.to_csv(DATA_FILE, index=False)
+            st.success(f"已删除 ITEM {delete_item}！")
+        else:
+            st.error("找不到对应的 ITEM 编号。")
+    else:
+        st.warning("目前没有任何记录可以删除。")
+
+# 显示当前表格
 if not st.session_state.df.empty:
-    st.markdown(f"**Stock as at {stock_date.strftime('%Y-%m-%d')}**")
+    st.markdown(f"### Stock as at {stock_date.strftime('%Y-%m-%d')}")
     st.markdown(st.session_state.df.to_html(index=False), unsafe_allow_html=True)
 
 # 下载按钮
-def to_excel(df, date_str):
+def to_excel(df):
     output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+    with pd.ExcelWriter(output) as writer:  # 不指定 openpyxl了
         df.to_excel(writer, index=False, sheet_name='Sheet1')
     return output.getvalue()
 
-excel_data = to_excel(st.session_state.df, stock_date.strftime('%Y-%m-%d'))
+excel_data = to_excel(st.session_state.df)
 
 st.download_button(
     label="下载为Excel",
@@ -130,4 +134,3 @@ st.download_button(
     file_name=f"点货记录_{stock_date.strftime('%Y%m%d')}.xlsx",
     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
 )
-
