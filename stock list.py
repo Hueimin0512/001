@@ -48,16 +48,13 @@ if "df" not in st.session_state:
             "QUANTITY NO OF BAG ITEM", "TOTAL", "TOTAL WEIGHT", "remark"
         ])
 
-# 输入栏
 st.header("输入点货资料")
 
-# 下拉+手动输入 DESCRIPTION
 description = st.selectbox("DESCRIPTION (可选或手动输入)", options=[""] + description_options)
 custom_description = st.text_input("若无，请手动输入DESCRIPTION")
 final_description = custom_description if custom_description else description
 
 standard_weight = st.number_input("STANDARD WEIGHT PER BAG", min_value=0.0, step=0.01)
-
 bag_per_pallet_input = st.text_input("NO OF BAG PER PALLET (可输入加法如 5+6)")
 pallet_qty_input = st.text_input("QUANTITY NO OF PELLET (可输入加法如 2+3)")
 bag_item_qty_input = st.text_input("QUANTITY NO OF BAG ITEM (可输入加法如 1+2)")
@@ -70,7 +67,6 @@ def eval_input(text):
     except:
         return 0
 
-# 计算 total 和 total weight
 if st.button("添加记录"):
     bag_per_pallet = eval_input(bag_per_pallet_input)
     pallet_qty = eval_input(pallet_qty_input)
@@ -92,15 +88,31 @@ if st.button("添加记录"):
     }
 
     st.session_state.df = pd.concat([st.session_state.df, pd.DataFrame([new_row])], ignore_index=True)
-    st.session_state.df.to_csv(DATA_FILE, index=False)  # 自动保存
+    st.session_state.df.to_csv(DATA_FILE, index=False)
     st.success("已添加并保存！")
 
-# 显示表格（手机端友好横排版 & 去掉左侧索引）
-if not st.session_state.df.empty:
-    st.markdown(st.session_state.df.to_html(index=False), unsafe_allow_html=True)
+st.header("📋 当前记录")
 
-# 下载按钮 (Excel 版)
+if not st.session_state.df.empty:
+    for i in st.session_state.df.index:
+        row = st.session_state.df.loc[i]
+        cols = st.columns([6, 1])
+        with cols[0]:
+            st.markdown(f"""
+                **ITEM**: {row['ITEM']} | **DESC**: {row['DESCRIPTION']} | **TOTAL**: {row['TOTAL']} | **WEIGHT**: {row['TOTAL WEIGHT']} | {row['remark']}
+            """)
+        with cols[1]:
+            if st.button("删除", key=f"del_{i}"):
+                st.session_state.df = st.session_state.df.drop(i).reset_index(drop=True)
+                # 重新编号 ITEM 列
+                st.session_state.df["ITEM"] = st.session_state.df.index + 1
+                st.session_state.df.to_csv(DATA_FILE, index=False)
+                st.experimental_rerun()
+
+# 修正版 to_excel
 def to_excel(df):
+    if df.empty:
+        df = pd.DataFrame({"提示": ["当前没有记录"]})
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='openpyxl') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
