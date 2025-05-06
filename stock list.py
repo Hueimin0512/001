@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
 import io
-import xlsxwriter  # ✅ 检测 xlsxwriter 是否已装
-
-# ✅ 显示 xlsxwriter 版本
-st.write("✅ xlsxwriter 已安装，版本：", xlsxwriter.__version__)
+import os  # ✅ 别忘了导入 os 用来检查文件
 
 st.title("📦 点货记录小工具")
 
@@ -114,16 +111,12 @@ def to_excel(df):
     if df.empty:
         df = pd.DataFrame({"提示": ["当前没有记录"]})
     output = io.BytesIO()
-    # 用xlsxwriter代替 openpyxl，更稳
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
-        writer.close()
     output.seek(0)
     return output.getvalue()
 
-st.write("✅ 当前DF：", st.session_state.get('df'))
-
-# 🔥 先生成excel数据
+# 🔥 生成excel数据
 excel_data = to_excel(st.session_state.df)
 
 # ✅ 下载按钮
