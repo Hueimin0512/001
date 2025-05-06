@@ -117,7 +117,7 @@ def to_excel(df):
     return output.getvalue()
 
 # 🔥 生成excel数据
-excel_data = to_excel(st.session_state.df)
+excel_data = to_excel(st.session_state.get('df', pd.DataFrame()))
 
 # ✅ 下载按钮
 st.download_button(
