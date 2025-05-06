@@ -1,7 +1,10 @@
 import streamlit as st
 import pandas as pd
 import io
-import xlsxwrite
+import xlsxwriter  # ✅ 检测 xlsxwriter 是否已装
+
+# ✅ 显示 xlsxwriter 版本
+st.write("✅ xlsxwriter 已安装，版本：", xlsxwriter.__version__)
 
 st.title("📦 点货记录小工具")
 
