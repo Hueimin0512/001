@@ -119,8 +119,7 @@ def to_excel(df):
     return output.getvalue()
 
 st.write("✅ 当前DF：", st.session_state.get('df'))
-import openpyxl
-st.write("✅ openpyxl 版本：", openpyxl.__version__)
+
 
 # 🔥 先生成excel数据
 excel_data = to_excel(st.session_state.df)
