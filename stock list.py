@@ -111,14 +111,21 @@ def to_excel(df):
     if df.empty:
         df = pd.DataFrame({"提示": ["当前没有记录"]})
     output = io.BytesIO()
-    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+    # 用xlsxwriter代替 openpyxl，更稳
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df.to_excel(writer, index=False, sheet_name='Sheet1')
+        writer.close()
+    output.seek(0)
     return output.getvalue()
 
 st.write("✅ 当前DF：", st.session_state.get('df'))
 import openpyxl
 st.write("✅ openpyxl 版本：", openpyxl.__version__)
 
+# 🔥 先生成excel数据
+excel_data = to_excel(st.session_state.df)
+
+# ✅ 下载按钮
 st.download_button(
     label="下载为Excel",
     data=excel_data,
