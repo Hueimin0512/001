@@ -1,12 +1,10 @@
-import streamlit as st
 import pandas as pd
-import io
-import os  # 导入 os 模块
-import xlsxwriter  # ✅ 检测 xlsxwriter 是否已装
+import streamlit as st
+import xlsxwriter
 
-# ✅ 显示 xlsxwriter 版本
-st.write("✅ xlsxwriter 已安装，版本：", xlsxwriter.__version__)
-
+st.write(f"✅ pandas 版本：{pd.__version__}")
+st.write(f"✅ streamlit 版本：{st.__version__}")
+st.write(f"✅ xlsxwriter 版本：{xlsxwriter.__version__}")
 st.title("📦 点货记录小工具")
 
 # 保存数据的CSV文件
