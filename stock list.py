@@ -93,23 +93,20 @@ if st.button("添加记录"):
 
 st.header("📋 当前记录")
 
+# ➡️ 表格展示
 if not st.session_state.df.empty:
-    for i in st.session_state.df.index:
-        row = st.session_state.df.loc[i]
-        cols = st.columns([6, 1])
-        with cols[0]:
-            st.markdown(f"""
-                **ITEM**: {row['ITEM']} | **DESC**: {row['DESCRIPTION']} | **TOTAL**: {row['TOTAL']} | **WEIGHT**: {row['TOTAL WEIGHT']} | {row['remark']}
-            """)
-        with cols[1]:
-            if st.button("删除", key=f"del_{i}"):
-                st.session_state.df = st.session_state.df.drop(i).reset_index(drop=True)
-                # 重新编号 ITEM 列
-                st.session_state.df["ITEM"] = st.session_state.df.index + 1
-                st.session_state.df.to_csv(DATA_FILE, index=False)
-                st.experimental_rerun()
+    st.markdown(st.session_state.df.to_html(index=False), unsafe_allow_html=True)
 
-# 修正版 to_excel
+    # ➡️ 删除功能
+    delete_index = st.number_input("输入要删除的行号 (ITEM)", min_value=1, max_value=int(st.session_state.df["ITEM"].max()), step=1)
+    if st.button("删除这行"):
+        st.session_state.df = st.session_state.df[st.session_state.df["ITEM"] != delete_index].reset_index(drop=True)
+        st.session_state.df["ITEM"] = st.session_state.df.index + 1
+        st.session_state.df.to_csv(DATA_FILE, index=False)
+        st.success(f"已删除第 {delete_index} 行！")
+        st.experimental_rerun()
+
+# ➡️ 导出 Excel
 def to_excel(df):
     if df.empty:
         df = pd.DataFrame({"提示": ["当前没有记录"]})
